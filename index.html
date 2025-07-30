@@ -1,54 +1,291 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Talk to AI Stella</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <header>
-      <h1>Talk to AI Stella</h1>
-    </header>
-    <main>
-      <form id="questionForm">
-        <label for="questionInput">Ask any question</label>
-        <input
-          type="text"
-          id="questionInput"
-          placeholder="Type your question here..."
-          required
-        />
-        <button type="submit">Ask Stella</button>
-      </form>
-      <div id="sampleQA">
-        <h2>Sample Q&A</h2>
-        <div>
-          <strong>Q:</strong> What's the meaning of life?
-          <strong>A:</strong> 42! Just kidding, it’s all about finding joy in
-          the little things.
+import React, { useState } from "react";
+import { InvokeLLM } from "@/integrations/Core";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Loader2, Send, Sparkles, User, Bot, ArrowRight, Mail, Twitter, Instagram, Linkedin } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+export default function Home() {
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasAsked, setHasAsked] = useState(false);
+
+  const sampleQAs = [
+    {
+      question: "What's the meaning of life?",
+      answer: "Oh honey, if I knew that, would I be here answering questions for ₹49 a pop? 😄 But seriously, I think it's about connection, growth, and finding joy in small moments. Like when your code finally works or when someone genuinely laughs at your joke!"
+    },
+    {
+      question: "How do I overcome procrastination?",
+      answer: "Listen darling, I'm literally an AI and even I procrastinate sometimes! 🤖 But here's what works: start ridiculously small. Want to write? Open a document. Want to exercise? Put on your shoes. The hardest part is always the first step, and I believe in you! ✨"
+    },
+    {
+      question: "Should I quit my job to follow my dreams?",
+      answer: "Ooh, the classic quarter-life crisis question! 💭 Look sweetie, dreams are beautiful, but so is eating regularly. Maybe start building your dream as a side project first? Test the waters before diving in. Your future self will thank you for being both brave AND smart! 🚀"
+    }
+  ];
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!question.trim()) return;
+
+    setIsLoading(true);
+    setHasAsked(true);
+
+    try {
+      const response = await InvokeLLM({
+        prompt: `You are Stella, an AI with a funny, emotional, and smart personality. You're witty, caring, and use emojis naturally. Respond to this question in Stella's voice: "${question}"`,
+      });
+      setAnswer(response);
+    } catch (error) {
+      setAnswer("Oops! Something went wrong on my end. Even AIs have bad days sometimes! 😅 Try asking again?");
+    }
+
+    setIsLoading(false);
+  };
+
+  return (
+    <div className="min-h-screen bg-white text-black font-sans">
+      {/* Hero Section */}
+      <motion.section 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        className="px-6 py-20 max-w-4xl mx-auto text-center"
+      >
+        <motion.div
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+        >
+          <h1 className="text-5xl md:text-7xl font-light tracking-tight mb-6">
+            Talk to AI <span className="font-medium">Stella</span>
+          </h1>
+          <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed">
+            Meet your witty, emotional, and brilliantly smart AI companion
+          </p>
+        </motion.div>
+
+        {/* Question Form */}
+        <motion.div
+          initial={{ y: 40, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.4, duration: 0.6 }}
+          className="mb-16"
+        >
+          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto">
+            <Input
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              placeholder="Ask me anything..."
+              className="flex-1 h-14 text-lg border-2 border-gray-200 focus:border-black transition-colors rounded-none"
+              disabled={isLoading}
+            />
+            <Button
+              type="submit"
+              disabled={isLoading || !question.trim()}
+              className="h-14 px-8 bg-black text-white hover:bg-gray-900 transition-colors rounded-none font-medium"
+            >
+              {isLoading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  <Send className="w-5 h-5 mr-2" />
+                  Ask Stella
+                </>
+              )}
+            </Button>
+          </form>
+        </motion.div>
+
+        {/* AI Response */}
+        <AnimatePresence>
+          {hasAsked && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="mb-16"
+            >
+              <Card className="max-w-3xl mx-auto border-2 border-gray-100 rounded-none shadow-lg">
+                <CardContent className="p-8">
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center">
+                      <Bot className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-medium mb-2">Stella says:</h3>
+                      <p className="text-gray-700 leading-relaxed text-lg">
+                        {answer || "Thinking..."}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.section>
+
+      {/* Sample Q&A Section */}
+      <section className="px-6 py-20 bg-gray-50">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-light mb-4">
+              See Stella in <span className="font-medium">Action</span>
+            </h2>
+            <p className="text-xl text-gray-600">Sample conversations with our AI personality</p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {sampleQAs.map((qa, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1, duration: 0.6 }}
+                viewport={{ once: true }}
+              >
+                <Card className="h-full border-2 border-gray-200 hover:border-black transition-colors rounded-none">
+                  <CardContent className="p-8">
+                    <div className="mb-6">
+                      <div className="flex items-center gap-3 mb-3">
+                        <User className="w-5 h-5 text-gray-400" />
+                        <span className="text-sm font-medium text-gray-500">Question</span>
+                      </div>
+                      <p className="text-lg font-medium mb-6">{qa.question}</p>
+                    </div>
+                    
+                    <div>
+                      <div className="flex items-center gap-3 mb-3">
+                        <Bot className="w-5 h-5 text-black" />
+                        <span className="text-sm font-medium text-gray-500">Stella</span>
+                      </div>
+                      <p className="text-gray-700 leading-relaxed">{qa.answer}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
         </div>
-        <div>
-          <strong>Q:</strong> Tell me a joke. <strong>A:</strong> Why did the
-          scarecrow win an award? Because he was outstanding in his field!
+      </section>
+
+      {/* CTA Section */}
+      <section className="px-6 py-20 bg-black text-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <Sparkles className="w-16 h-16 mx-auto mb-8 text-white" />
+            <h2 className="text-4xl md:text-6xl font-light mb-6">
+              Create Your Own <span className="font-medium">AI Clone</span>
+            </h2>
+            <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto leading-relaxed">
+              Build a personalized AI with your unique personality, knowledge, and style. 
+              Perfect for businesses, creators, and personal projects.
+            </p>
+            
+            <div className="mb-12">
+              <div className="text-5xl font-light mb-2">₹49</div>
+              <div className="text-gray-400">per question • instant responses</div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                onClick={() => window.open('https://rzp.io/l/ai-stella-payment', '_blank')}
+                className="h-14 px-12 bg-white text-black hover:bg-gray-100 transition-colors rounded-none font-medium text-lg"
+              >
+                Start Creating Now
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+              <Button
+                variant="outline"
+                className="h-14 px-12 border-2 border-white text-white hover:bg-white hover:text-black transition-colors rounded-none font-medium text-lg"
+              >
+                Learn More
+              </Button>
+            </div>
+          </motion.div>
         </div>
-        <div>
-          <strong>Q:</strong> How do I become successful?
-          <strong>A:</strong> Start by defining success for yourself; then take
-          small steps every day. And maybe get a lucky charm!
+      </section>
+
+      {/* Footer */}
+      <footer className="px-6 py-16 bg-white border-t border-gray-200">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-12 mb-12">
+            <div>
+              <h3 className="text-2xl font-medium mb-4">Talk to AI Stella</h3>
+              <p className="text-gray-600 leading-relaxed max-w-md">
+                Experience conversations with AI that feels genuinely human - 
+                witty, emotional, and brilliantly smart.
+              </p>
+            </div>
+            
+            <div>
+              <h4 className="text-lg font-medium mb-6">Get in Touch</h4>
+              <div className="space-y-4">
+                <a
+                  href="mailto:hello@aistellaclone.com"
+                  className="flex items-center gap-3 text-gray-700 hover:text-black transition-colors"
+                >
+                  <Mail className="w-5 h-5" />
+                  hello@aistellaclone.com
+                </a>
+                
+                <div className="flex gap-4 pt-4">
+                  <a
+                    href="https://twitter.com/aistellaclone"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 bg-gray-100 hover:bg-black hover:text-white transition-colors flex items-center justify-center"
+                  >
+                    <Twitter className="w-5 h-5" />
+                  </a>
+                  <a
+                    href="https://instagram.com/aistellaclone"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 bg-gray-100 hover:bg-black hover:text-white transition-colors flex items-center justify-center"
+                  >
+                    <Instagram className="w-5 h-5" />
+                  </a>
+                  <a
+                    href="https://linkedin.com/company/aistellaclone"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 bg-gray-100 hover:bg-black hover:text-white transition-colors flex items-center justify-center"
+                  >
+                    <Linkedin className="w-5 h-5" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="pt-8 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p className="text-gray-500">
+              © 2024 AI Stella Clone. All rights reserved.
+            </p>
+            <div className="flex gap-6 text-sm text-gray-500">
+              <a href="#" className="hover:text-black transition-colors">Privacy Policy</a>
+              <a href="#" className="hover:text-black transition-colors">Terms of Service</a>
+              <a href="#" className="hover:text-black transition-colors">Support</a>
+            </div>
+          </div>
         </div>
-      </div>
-      <button id="createAIClone">Create your own AI clone</button>
-      <a href="#" id="paymentLink">Ask a question for ₹49</a>
-    </main>
-    <footer>
-      <p>Email: info@talktoAIStella.com</p>
-      <div>
-        <a href="#">Facebook</a>
-        <a href="#">Twitter</a>
-        <a href="#">Instagram</a>
-      </div>
-    </footer>
-    <script src="script.js"></script>
-  </body>
-</html>
+      </footer>
+    </div>
+  );
+}
