@@ -1,0 +1,53 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: black;
+  color: white;
+  margin: 0;
+  padding: 20px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+form {
+  margin: 20px auto;
+  max-width: 600px;
+}
+
+input[type='text'] {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid white;
+  background-color: black;
+  color: white;
+}
+
+button,
+a {
+  background-color: white;
+  color: black;
+  padding: 10px 20px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+  display: inline-block;
+}
+
+footer {
+  text-align: center;
+  margin-top: 20px;
+}
+
+#sampleQA {
+  margin-top: 20px;
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+}
